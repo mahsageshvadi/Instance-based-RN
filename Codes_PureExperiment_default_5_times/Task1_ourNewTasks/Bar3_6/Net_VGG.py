@@ -261,4 +261,3 @@ if __name__ == '__main__':
         pickle.dump(stats, f)
 
         f.close()
-
