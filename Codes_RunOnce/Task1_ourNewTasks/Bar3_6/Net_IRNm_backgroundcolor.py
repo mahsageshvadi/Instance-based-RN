@@ -168,10 +168,12 @@ def SavePredictedResult(dir_results, x, y, flag = 'train'):
 
 if __name__ == '__main__':
         dir_rootpath = os.path.abspath(".") + "/results/{}/".format(a.savedir)    # ./results/network_name/
-        ClearDir(dir_rootpath)
+        if os.path.exists(dir_rootpath):
+            ClearDir(dir_rootpath)
         dir_results = dir_rootpath+  "{}_{}/".format( a.savedir, exp_id )
-        ClearDir(dir_results)
-        ClearDir(dir_results + "backup")
+        if os.path.exists(dir_results):
+            ClearDir(dir_results)
+            ClearDir(dir_results + "backup")
 
         x_train, y_train = GenerateDatasetIRNm(flag='train', image_num=train_num)
         x_val, y_val = GenerateDatasetIRNm(flag='val', image_num=val_num)
