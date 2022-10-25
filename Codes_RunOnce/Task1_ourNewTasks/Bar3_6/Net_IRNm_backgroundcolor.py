@@ -44,7 +44,7 @@ parser.add_argument('--runnumber', type = int)
 a = parser.parse_args()
 
 m_optimizer = Adam(a.lr)
-os.environ["CUDA_VISIBLE_DEVICES"] = 'gpu'
+os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
 
 config = Config()
 
@@ -158,6 +158,7 @@ def SavePredictedResult(dir_results, x, y, flag = 'train'):
             predictFile.write(str(y[i,t]) + '\t')
         predictFile.write('\n')
         for t in range(dim):  # save the predicted results.
+            predictFile.write(str(predict_Y[i, t]) + '\t')
             predictFile.write(str(predict_Y[i, t]) + '\t')
         predictFile.write('\n')
     predictFile.close()
