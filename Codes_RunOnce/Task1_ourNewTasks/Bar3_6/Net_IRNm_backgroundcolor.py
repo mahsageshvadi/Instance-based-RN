@@ -44,7 +44,7 @@ parser.add_argument('--runnumber', type = int)
 a = parser.parse_args()
 
 m_optimizer = Adam(a.lr)
-os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
+#os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
 
 config = Config()
 
