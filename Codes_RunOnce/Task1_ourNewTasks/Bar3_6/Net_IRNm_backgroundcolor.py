@@ -31,27 +31,25 @@ m_batchSize = 32            # batch_size
 m_print_loss_step = 15      # print once after how many iterations.
 
 exp_id = 1
-lr = 0.0001
-savedir = 'IRNm'
-gpu = 1
 
 """ processing command line """
-#parser = argparse.ArgumentParser()
-#parser.add_argument("--times", default=5, type=int)
-#parser.add_argument("--gpu", default='0')                  # gpu id
-#parser.add_argument("--lr", default=0.0001, type = float)  # learning rate
-#parser.add_argument("--savedir", default= 'IRNm')           # saving path.
-#parser.add_argument("--backup", default=False, type=bool)   # whether to save weights after each epoch.
-                                                           # (If True, it will cost lots of memories)
-#a = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument("--times", default=5, type=int)
+parser.add_argument("--gpu", default='1')                  # gpu id
+parser.add_argument("--lr", default=0.0001, type = float)  # learning rate
+parser.add_argument("--savedir", default= 'IRNm')           # saving path.
+parser.add_argument("--backup", default=False, type=bool)   # whether to save weights after each epoch.
 
-m_optimizer = Adam(lr)
+parser.add_argument('--runnumber', type = int)
+a = parser.parse_args()
+
+m_optimizer = Adam(a.lr)
 os.environ["CUDA_VISIBLE_DEVICES"] = 'gpu'
 
 config = Config()
 
 # create save folder.
-MakeDir("./results/")
+MakeDir("./results{}/".format(str(a.runnumber)) )
 
 
 # Level1 module is to extract the individual features from one instance.
@@ -169,9 +167,9 @@ def SavePredictedResult(dir_results, x, y, flag = 'train'):
     return MLAE, y, predict_Y
 
 if __name__ == '__main__':
-        dir_rootpath = os.path.abspath(".") + "/results/{}/".format(savedir)    # ./results/network_name/
+        dir_rootpath = os.path.abspath(".") + "/results/{}/".format(a.savedir)    # ./results/network_name/
         ClearDir(dir_rootpath)
-        dir_results = dir_rootpath+  "{}_{}/".format( savedir, exp_id )
+        dir_results = dir_rootpath+  "{}_{}/".format( a.savedir, exp_id )
         ClearDir(dir_results)
         ClearDir(dir_results + "backup")
 
@@ -318,7 +316,7 @@ if __name__ == '__main__':
         stats['y_test'] = _y_test
         stats['y_pred'] = _y_pred
 
-        with open(dir_rootpath + "{}_{}.p".format(savedir, exp_id), 'wb') as f:
+        with open(dir_rootpath + "{}_{}.p".format(a.savedir, exp_id), 'wb') as f:
             pickle.dump(stats, f)
             f.close()
 
@@ -331,7 +329,7 @@ if __name__ == '__main__':
         MSE_tests = []
 
 
-        with open(dir_rootpath + "{}_{}.p".format(savedir, exp_id), 'rb') as f:
+        with open(dir_rootpath + "{}_{}.p".format(a.savedir, exp_id), 'rb') as f:
             stats = pickle.load(f)
 
             MLAE_trains.append(stats['MLAE_train'])
@@ -341,7 +339,7 @@ if __name__ == '__main__':
 
             f.close()
 
-        with open(dir_rootpath + "{}_avg.p".format(savedir), 'wb') as f:
+        with open(dir_rootpath + "{}_avg.p".format(a.savedir), 'wb') as f:
             stats = dict()
 
             stats['MSE_train_avg'] = np.average(MSE_trains)
