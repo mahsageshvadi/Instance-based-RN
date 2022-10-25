@@ -179,7 +179,6 @@ def GenerateDatasetVGG(flag, image_num):
 
 def GenerateDatasetIRNm(flag, image_num):
     print("Generating {} Dataset: {} ----------------".format(str.upper(flag), image_num))
-
     _images = np.ones((config.max_obj_num, image_num, config.image_height, config.image_width, 1), dtype='float32')
     _labels = []
 

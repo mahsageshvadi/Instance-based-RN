@@ -185,14 +185,13 @@ def GenerateDatasetVGG(flag, image_num):
 def GenerateDatasetIRNm(flag, image_num):
     print("Generating {} Dataset: {} ----------------".format(str.upper(flag), image_num))
 
-    _images = np.ones((config.max_obj_num, image_num, config.image_height, config.image_width, 1), dtype='float32')
+    _images = np.ones((config.max_obj_num, image_num, config.image_height, config.image_width, 3), dtype='float32')
     _labels = []
 
     min_num_obj = min_train_obj if flag == 'train' else min_test_obj
     max_num_obj = max_train_obj if flag == 'train' else max_test_obj
 
     for i in range(image_num):
-
         _, subimages, featureVector = GenerateOneBarChart(num=np.random.randint(min_num_obj, max_num_obj + 1))
         featureVector = np.array(featureVector)
 

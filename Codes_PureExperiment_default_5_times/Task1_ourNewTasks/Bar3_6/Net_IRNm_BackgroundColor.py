@@ -20,14 +20,11 @@ import pickle
 
 
 """ some important configuration """
-#train_num = 60000             # image number.
-#val_num   = 20000
-#test_num  = 20000
+train_num = 60000             # image number.
+val_num   = 20000
+test_num  = 20000
 
-#todo change this
-train_num = 60             # image number.
-val_num   = 20
-test_num  = 20
+
 
 m_epoch = 100                # epoch
 m_batchSize = 32            # batch_size
@@ -169,7 +166,7 @@ def SavePredictedResult(dir_results, x, y, flag = 'train'):
     return MLAE, y, predict_Y
 
 if __name__ == '__main__':
-    dir_rootpath = os.path.abspath(".") + "/results/{}/".format(a.savedir)    # ./results/network_name/
+    dir_rootpath = os.path.abspath(".") + "/results_withBackgroundColor/{}/".format(a.savedir)    # ./results/network_name/
     ClearDir(dir_rootpath)
 
     exp_id = 0

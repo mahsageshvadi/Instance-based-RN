@@ -50,7 +50,7 @@ def GenerateOneBarChart(num, size = config.image_width, random_color = True):
         sy = size - 1
         ex = sx + barWidth
         ey = sy - heights[i]
-
+        
         cv2.rectangle(image,(sx,sy),(ex,ey),colors[i] * 255,-1)
         cv2.rectangle(subImages[i],(sx,sy),(ex,ey),colors[i] * 255,-1)
         sx = ex + spaceWidth
@@ -70,6 +70,7 @@ def GenerateOneBarChart(num, size = config.image_width, random_color = True):
         _max = subImages[i].max()
         subImages[i] -= _min
         subImages[i] /= (_max - _min)
+
     #
     heights = heights.astype('float32')
     max_height = max(heights)
