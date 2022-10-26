@@ -35,7 +35,7 @@ exp_id = 1
 """ processing command line """
 parser = argparse.ArgumentParser()
 parser.add_argument("--times", default=5, type=int)
-parser.add_argument("--gpu", default='1')                  # gpu id
+parser.add_argument("--gpu", default='0')                  # gpu id
 parser.add_argument("--lr", default=0.0001, type = float)  # learning rate
 parser.add_argument("--savedir", default= 'IRNm')           # saving path.
 parser.add_argument("--backup", default=False, type=bool)   # whether to save weights after each epoch.
@@ -44,7 +44,7 @@ parser.add_argument('--runnumber', type = int)
 a = parser.parse_args()
 
 m_optimizer = Adam(a.lr)
-#os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
+os.environ["CUDA_VISIBLE_DEVICES"] = a.gpu
 
 config = Config()
 
