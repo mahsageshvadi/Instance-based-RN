@@ -1,0 +1,20 @@
+--2023-03-15 00:21:50--  https://www.dropbox.com/sh/kd9kwavseg097oc/AACD_nphs84ELCPrzUkhFhNIa/results/rc/E2/C_Color_Bar/results/IcRN/IcRN_0?dl=0
+Resolving www.dropbox.com (www.dropbox.com)... 162.125.4.18, 2620:100:601b:18::a27d:812
+Connecting to www.dropbox.com (www.dropbox.com)|162.125.4.18|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: /sh/raw/kd9kwavseg097oc/AACD_nphs84ELCPrzUkhFhNIa/results/rc/E2/C_Color_Bar/results/IcRN/IcRN_0 [following]
+--2023-03-15 00:21:50--  https://www.dropbox.com/sh/raw/kd9kwavseg097oc/AACD_nphs84ELCPrzUkhFhNIa/results/rc/E2/C_Color_Bar/results/IcRN/IcRN_0
+Reusing existing connection to www.dropbox.com:443.
+HTTP request sent, awaiting response... 302 Found
+Location: https://uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com/zip_download_get/BboMunj24OiS97cphqhdfXj1-NUQVfASS5fMopcDX6U4a4edpn5knJFqZCXInrb49tPXlPi3YJcjegIktzRB0VjgT9fx14vblbbSlFgygUxAQQ# [following]
+--2023-03-15 00:21:51--  https://uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com/zip_download_get/BboMunj24OiS97cphqhdfXj1-NUQVfASS5fMopcDX6U4a4edpn5knJFqZCXInrb49tPXlPi3YJcjegIktzRB0VjgT9fx14vblbbSlFgygUxAQQ
+Resolving uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com (uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com)... 162.125.4.15, 2620:100:601b:15::a27d:80f
+Connecting to uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com (uce42553173ee87939b40131b1ad.dl.dropboxusercontent.com)|162.125.4.15|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 43365891 (41M) [application/zip]
+Saving to: ‘IcRN_0?dl=0’
+
+IcRN_0?dl=0                          0%[                                                                 ]       0  --.-KB/s               IcRN_0?dl=0                          0%[                                                                 ]   8.14K  38.0KB/s               IcRN_0?dl=0                          0%[                                                                 ] 316.75K   472KB/s               IcRN_0?dl=0                         25%[===============>                                                 ]  10.59M  10.4MB/s               IcRN_0?dl=0                         79%[==================================================>              ]  32.71M  26.9MB/s               IcRN_0?dl=0                        100%[================================================================>]  41.36M  32.0MB/s    in 1.3s    
+
+2023-03-15 00:21:52 (32.0 MB/s) - ‘IcRN_0?dl=0’ saved [43365891/43365891]
+
