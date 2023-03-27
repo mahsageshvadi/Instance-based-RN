@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import shutil
-from Configure import Config, MakeDir
+from BarLineWidth.ICRNConfigure import Config, MakeDir
 import math
 
 config = Config()
