@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import shutil
-from BarColor_randomcolor.ICRNConfigure import Config, MakeDir
+from Configure import Config, MakeDir
 import math
 
 config = Config()
@@ -192,7 +192,6 @@ def GenerateDatasetIRNm(flag, image_num):
         _, subimages, featureVector = GenerateOneBarChart(
                 num=np.random.randint(min_num_obj, max_num_obj + 1))
         featureVector = np.array(featureVector)
-
         if i % 5000 == 0:
             print("   id {} (obj_num = {})".format(i, featureVector.shape[0]))
 
@@ -213,3 +212,14 @@ def GenerateDatasetIRNm(flag, image_num):
     print('y_shape: ', _labels.shape)
 
     return _images, _labels
+
+
+x_test, y_test =GenerateDatasetIRNm('test', 10)
+x_test = [x_test[i] for i in range(config.max_obj_num)]
+input_test = [x_test[i] for i in range(config.max_obj_num)]
+input_test.append(np.ones(x_test[0].shape[0]))
+
+print(len(x_test))
+print(x_test[0].shape)
+print(len(input_test))
+

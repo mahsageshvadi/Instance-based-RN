@@ -12,18 +12,21 @@ import os
 from  openpyxl import Workbook
 import sklearn
 from sklearn.metrics import mean_squared_error
-from Configure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
+from ICRNConfigure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
 import time, argparse
 from utils.non_local import non_local_block
-from Dataset_generator import GenerateDatasetVGG,GenerateDatasetIRNm
+from DataSet_generator_BackgroundColor import GenerateDatasetVGG,GenerateDatasetIRNm
 import pickle
 
+
 """ some important configuration """
-train_num = 60000             # image number.
+train_num = 60000           # image number.
 val_num   = 20000
 test_num  = 20000
 
-m_epoch = 100                # epoch
+
+
+m_epoch = 10               # epoch
 m_batchSize = 32            # batch_size
 m_print_loss_step = 15      # print once after how many iterations.
 
@@ -48,10 +51,10 @@ config = Config()
 MakeDir("./results/")
 
 
-
 # Level1 module is to extract the individual features from one instance.
 # Level1 has two NON-LOCAL block.
 def Level1_Module():
+    #todo change this
     input = Input(shape=(config.image_height, config.image_width, 3))
     x = Conv2D(32, (3, 3), activation='relu', padding='same')(input)
     x = Conv2D(32, (3, 3), activation='relu', padding='same')(x)
@@ -95,6 +98,7 @@ def Build_IRN_m_Network():
     input_layers = []
     # the first 'obj_num' inputs are corresponding to the input sub-charts.
     for i in range(config.max_obj_num):
+        #todo change this
         input = Input(shape=(config.image_height, config.image_width, 3), name="input_{}".format(i))
         input_layers.append(input)
 
@@ -175,20 +179,20 @@ if __name__ == '__main__':
 
         x_train, y_train = GenerateDatasetIRNm(flag='train', image_num=train_num)
         x_val, y_val = GenerateDatasetIRNm(flag='val', image_num=val_num)
-        x_test, y_test = GenerateDatasetIRNm(flag='val', image_num=val_num)
-
+        x_test, y_test = GenerateDatasetIRNm(flag='test', image_num=test_num)
+        print("after generating")
         x_train -= .5
         x_val -= .5
         x_test -= .5
 
         # format the inputs as [img1, img2, img3,....., 1.0]
-        # Note that we add R0=1.0 in the last.
+        # Note that we add R1=1.0 in the last.
         x_train = [x_train[i] for i in range(config.max_obj_num)]
         x_val = [x_val[i] for i in range(config.max_obj_num)]
         x_test = [x_test[i] for i in range(config.max_obj_num)]
-        x_train.append(np.ones(train_num))  # Train_num, R0 = 1.0
-        x_val.append(np.ones(val_num))  # Val_num, R0 = 1.0
-        x_test.append(np.ones(test_num))  # Test_num, R0 = 1.0
+        x_train.append(np.ones(train_num))  # Train_num, R1 = 1.0
+        x_val.append(np.ones(val_num))  # Val_num, R1 = 1.0
+        x_test.append(np.ones(test_num))  # Test_num, R1 = 1.0
 
         print("----------Build Network----------------")
         model = Build_IRN_m_Network()
@@ -200,14 +204,10 @@ if __name__ == '__main__':
         batch_amount = train_num // m_batchSize
         rest_size = train_num - (batch_amount * m_batchSize)
 
-        # best model according to the training loss. (Since this network can't deal with this generalization task)
+        # information of the best model on validation set.
+        best_val_loss = 99999.99999
+        best_model_name = "xxxxx"
         best_train_loss = 99999.99999
-        val_loss_using_Train = 99999.99999  # corresponding val loss using the best model on training set.
-        best_model_name_onTrain = "xxxxx"
-
-        # best model according to val loss.
-        best_val_loss = 99999.999999
-        best_model_name_onVal = "xxxxx"
 
         iter = 0
         while iter < m_epoch:
@@ -241,49 +241,35 @@ if __name__ == '__main__':
             epoch_loss_train = model.evaluate(x=x_train, y=y_train, verbose=0, batch_size=m_batchSize)
             epoch_loss_val = model.evaluate(x=x_val, y=y_val, verbose=0, batch_size=m_batchSize)
             history_iter.append([iter, epoch_loss_train, epoch_loss_val])
-            print(
-                "----- epoch({}/{}) train_loss={}, val_loss={}".format(iter, m_epoch, epoch_loss_train, epoch_loss_val))
+            print("----- epoch({}/{}) train_loss={}, val_loss={}".format(iter, m_epoch, epoch_loss_train, epoch_loss_val))
 
             # to avoid stuck in local optimum at the beginning
             iter += 1
             if iter >= 20 and best_train_loss > 0.05:
                 history_iter.clear()
                 history_batch.clear()
-                best_train_loss = best_val_loss = val_loss_using_Train = 999999.
+                best_train_loss = best_val_loss = 999999.
 
-                model = Build_IRN_m_Network()  # reset the network.
+                model = Build_IRN_m_Network()
                 model.compile(loss='mse', optimizer=m_optimizer)
                 iter = 0
                 continue
 
-            if epoch_loss_train < best_train_loss:
-                RemoveDir(best_model_name_onTrain)
-                best_model_name_onTrain = dir_results + "model_irnm_onTrain_{}.h5".format(epoch_loss_val)
-                model.save_weights(best_model_name_onTrain)
-                val_loss_using_Train = epoch_loss_val
+            if epoch_loss_val < best_val_loss:  # save the best model on Validation set.
+                RemoveDir(best_model_name)
+                best_model_name = dir_results + "model_irnm_onVal_{}.h5".format(epoch_loss_val)
+                model.save_weights(best_model_name)
+                best_val_loss = epoch_loss_val
                 best_train_loss = epoch_loss_train
 
-            if epoch_loss_val < best_val_loss:  # save the best model on Validation set.
-                best_val_loss = epoch_loss_val
-                RemoveDir(best_model_name_onVal)
-                best_model_name_onVal = dir_results + "model_irnm_onVal_{}.h5".format(epoch_loss_val)
-                model.save_weights(best_model_name_onVal)
-
         # test on the testing set.
-        model.load_weights(best_model_name_onTrain)  # using the best model
-        test_loss_usingTrain = model.evaluate(x_test, y_test, verbose=0, batch_size=m_batchSize)
+        model.load_weights(best_model_name)  # using the best model
+        test_loss = model.evaluate(x_test, y_test, verbose=0, batch_size=m_batchSize)
 
         # Save the predicted results and return the MLAE.
-        MLAE_train,_,_ = SavePredictedResult(dir_results, x_train, y_train, 'train_usingTrain')
-        MLAE_val,_,_ = SavePredictedResult(dir_results, x_val, y_val, 'val_usingTrain')
-        MLAE_test,_,_ = SavePredictedResult(dir_results, x_test, y_test, 'test_usingTrain')
-
-        model.load_weights(best_model_name_onVal)  # using the best model.
-        train_loss_onVal = model.evaluate(x_train, y_train, verbose=0, batch_size=m_batchSize)
-        test_loss_onVal = model.evaluate(x_test, y_test, verbose=0, batch_size=m_batchSize)
-        MLAE_train_onVal,_,_ = SavePredictedResult(dir_results, x_train, y_train, 'train_usingVal')
-        MLAE_val_onVal,_,_ = SavePredictedResult(dir_results, x_val, y_val, 'val_usingVal')
-        MLAE_test_onVal, _y_test , _y_pred = SavePredictedResult(dir_results, x_test, y_test, 'test_usingVal')
+        MLAE_train,_,_ = SavePredictedResult(dir_results, x_train, y_train, 'train')
+        MLAE_val,_,_ = SavePredictedResult(dir_results, x_val, y_val, 'val')
+        MLAE_test, _y_test, _y_pred = SavePredictedResult(dir_results, x_test, y_test, 'test')
 
         # save the training information.
         wb = Workbook()
@@ -300,61 +286,36 @@ if __name__ == '__main__':
         for i in range(len(history_batch)):
             ws3.append(history_batch[i])
 
-        ws1.append(["----------", "Using best model on train_set"])
-        ws1.append(["Best Train loss", best_train_loss])
-        ws1.append(["Val loss usingTrain", val_loss_using_Train])
-        ws1.append(["Test loss usingTrain", test_loss_usingTrain])
+        ws1.append(["Train loss", best_train_loss])
+        ws1.append(["Val loss", best_val_loss])
+        ws1.append(["Test loss", test_loss])
         ws1.append(["Train MLAE", MLAE_train])
         ws1.append(["val MLAE", MLAE_val])
         ws1.append(["Test MLAE", MLAE_test])
-        ws1.append(["----------", "Using best model on val_set    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"])
-        ws1.append(["Train loss usingVal", train_loss_onVal])
-        ws1.append(["Best Val loss", best_val_loss])
-        ws1.append(["Test loss usingVal", test_loss_onVal])
-        ws1.append(["Train MLAE using Val", MLAE_train_onVal])
-        ws1.append(["Val MLAE using Val", MLAE_val_onVal])
-        ws1.append(["Test MLAE using Val", MLAE_test_onVal])
 
         wb.save(dir_results + "train_info.xlsx")
 
-        print("-----Using the best model according to training loss-------")
         print("Training MSE:", best_train_loss)
-        print("Validat. MSE", val_loss_using_Train)
-        print("Testing MSE:", test_loss_usingTrain)
+        print("Validat. MSE:", best_val_loss)
+        print("Testing MSE:", test_loss)
         print("Training MLAE:", MLAE_train)
-        print("Validat. MLAE", MLAE_val)
+        print("Validat. MLAE:", MLAE_val)
         print("Testing MLAE:", MLAE_test)
 
-        print("-----Using the best model according to Validation loss-------")
-        print("Training MSE:", train_loss_onVal)
-        print("Validat. MSE:", best_val_loss)
-        print("Testing MSE:", test_loss_onVal)
-        print("Training MLAE:", MLAE_train_onVal)
-        print("Validat. MLAE", MLAE_val_onVal)
-        print("Testing MLAE:", MLAE_test_onVal)
-
         ## save as pickle file
+
         stats = dict()
-        stats_usingTrain = dict()
-        stats_usingTrain['MSE_train'] = best_train_loss
-        stats_usingTrain['MSE_val'] = val_loss_using_Train
-        stats_usingTrain['MSE_test'] = test_loss_usingTrain
-        stats_usingTrain['MLAE_train'] = MLAE_train
-        stats_usingTrain['MLAE_val'] = MLAE_val
-        stats_usingTrain['MLAE_test'] = MLAE_test
 
-        stats_usingVal = dict()
-        stats_usingVal['MSE_train'] = train_loss_onVal
-        stats_usingVal['MSE_val'] = best_val_loss
-        stats_usingVal['MSE_test'] = test_loss_onVal
-        stats_usingVal['MLAE_train'] = MLAE_train_onVal
-        stats_usingVal['MLAE_val'] = MLAE_val_onVal
-        stats_usingVal['MLAE_test'] = MLAE_test_onVal
+        stats['MSE_train'] = best_train_loss
+        stats['MSE_val'] = best_val_loss
+        stats['MSE_test'] = test_loss
 
-        stats['Results_using_BestModel_OnValSet'] = stats_usingVal
-        stats['Results_using_BestModel_OnTrainSet'] = stats_usingTrain
+        stats['MLAE_train'] = MLAE_train
+        stats['MLAE_val'] = MLAE_val
+        stats['MLAE_test'] = MLAE_test
+
         stats['loss_train'] = [history_iter[i][1] for i in range(len(history_iter))]
-        stats['loss_val'] = [history_iter[i][2] for i in range(len(history_iter))]
+        stats['loss_val'] =   [history_iter[i][2] for i in range(len(history_iter))]
 
         stats['y_test'] = _y_test
         stats['y_pred'] = _y_pred
@@ -363,60 +324,39 @@ if __name__ == '__main__':
             pickle.dump(stats, f)
             f.close()
 
-        exp_id += 1
+        exp_id +=1
 
     # compute average MLAE, MSE and SD.
-    MLAE_trains_onTrain = []
-    MLAE_tests_onTrain = []
-    MSE_trains_onTrain = []
-    MSE_tests_onTrain = []
+    MLAE_trains = []
+    MLAE_tests = []
 
-    MLAE_trains_onVal = []
-    MLAE_tests_onVal = []
-    MSE_trains_onVal = []
-    MSE_tests_onVal = []
+    MSE_trains = []
+    MSE_tests = []
+
 
     for exp_id in range(a.times):
         with open(dir_rootpath + "{}_{}.p".format(a.savedir, exp_id), 'rb') as f:
             stats = pickle.load(f)
 
-            MLAE_trains_onTrain.append(stats['Results_using_BestModel_OnTrainSet']['MLAE_train'])
-            MLAE_tests_onTrain.append(stats['Results_using_BestModel_OnTrainSet']['MLAE_test'])
-            MSE_trains_onTrain.append(stats['Results_using_BestModel_OnTrainSet']['MSE_train'])
-            MSE_tests_onTrain.append(stats['Results_using_BestModel_OnTrainSet']['MSE_test'])
-
-            MLAE_trains_onVal.append(stats['Results_using_BestModel_OnValSet']['MLAE_train'])
-            MLAE_tests_onVal.append(stats['Results_using_BestModel_OnValSet']['MLAE_test'])
-            MSE_trains_onVal.append(stats['Results_using_BestModel_OnValSet']['MSE_train'])
-            MSE_tests_onVal.append(stats['Results_using_BestModel_OnValSet']['MSE_test'])
+            MLAE_trains.append(stats['MLAE_train'])
+            MLAE_tests.append(stats['MLAE_test'])
+            MSE_trains.append(stats['MSE_train'])
+            MSE_tests.append(stats['MSE_test'])
 
             f.close()
 
     with open(dir_rootpath + "{}_avg.p".format(a.savedir), 'wb') as f:
         stats = dict()
-        stats_usingTrain = dict()
-        stats_usingTrain['MSE_train_avg'] = np.average(MSE_trains_onTrain)
-        stats_usingTrain['MSE_test_avg'] = np.average(MSE_tests_onTrain)
-        stats_usingTrain['MSE_train_SD'] = np.std(MSE_trains_onTrain)
-        stats_usingTrain['MSE_test_SD'] = np.std(MSE_tests_onTrain)
-        stats_usingTrain['MLAE_train_avg'] = np.average(MLAE_trains_onTrain)
-        stats_usingTrain['MLAE_test_avg'] = np.average(MLAE_tests_onTrain)
-        stats_usingTrain['MLAE_train_SD'] = np.std(MLAE_trains_onTrain)
-        stats_usingTrain['MLAE_test_SD'] = np.std(MLAE_tests_onTrain)
 
-        stats_usingVal = dict()
-        stats_usingVal['MSE_train_avg'] = np.average(MSE_trains_onVal)
-        stats_usingVal['MSE_test_avg'] = np.average(MSE_tests_onVal)
-        stats_usingVal['MSE_train_SD'] = np.std(MSE_trains_onVal)
-        stats_usingVal['MSE_test_SD'] = np.std(MSE_tests_onVal)
+        stats['MSE_train_avg'] = np.average(MSE_trains)
+        stats['MSE_test_avg'] = np.average(MSE_tests)
+        stats['MSE_train_SD'] = np.std(MSE_trains)
+        stats['MSE_test_SD'] = np.std(MSE_tests)
 
-        stats_usingVal['MLAE_train_avg'] = np.average(MLAE_trains_onVal)
-        stats_usingVal['MLAE_test_avg'] = np.average(MLAE_tests_onVal)
-        stats_usingVal['MLAE_train_SD'] = np.std(MLAE_trains_onVal)
-        stats_usingVal['MLAE_test_SD'] = np.std(MLAE_tests_onVal)
-
-        stats['Results_using_BestModel_OnValSet'] = stats_usingVal
-        stats['Results_using_BestModel_OnTrainSet'] = stats_usingTrain
+        stats['MLAE_train_avg'] = np.average(MLAE_trains)
+        stats['MLAE_test_avg'] = np.average(MLAE_tests)
+        stats['MLAE_train_SD'] = np.std(MLAE_trains)
+        stats['MLAE_test_SD'] = np.std(MLAE_tests)
         pickle.dump(stats, f)
 
         f.close()
