@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import shutil
-from Configure import Config, MakeDir
+from BarColor_randomcolor.ICRNConfigure import Config, MakeDir
 import math
 
 config = Config()
