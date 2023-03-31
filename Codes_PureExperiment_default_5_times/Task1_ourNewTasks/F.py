@@ -35,10 +35,10 @@ ICRN_model  = importlib.import_module(dir + '.Net_IRNm').Build_IRN_m_Network()
 
 
 if color == True:
-    RCNNMODEL_DIR = os.path.join(ROOT_DIR, "MaskRCNNlogs/BarChart_color")
+    RCNNMODEL_DIR = os.path.join(ROOT_DIR, "/raid/mpsych/cqa/MaskRCNNWeights/bars/mask_rcnn_color.h5")
     channel = 3
 else:
-    RCNNMODEL_DIR = os.path.join(ROOT_DIR, "MaskRCNNlogs/BarChart_color/logs_bar12")
+    RCNNMODEL_DIR = os.path.join(ROOT_DIR, "/raid/mpsych/cqa/MaskRCNNWeights/bars/mask_rcnn_gray.h5")
     channel = 1
 
 
@@ -79,7 +79,7 @@ maskrcnn_model = modellib.MaskRCNN(mode="inference",
                           config=inference_config,
                           model_dir=RCNNMODEL_DIR)
 
-maskrcnn_model_path = maskrcnn_model.find_last()
+maskrcnn_model_path = RCNNMODEL_DIR #maskrcnn_model.find_last()
 
 # Load trained weights
 maskrcnn_model.load_weights(maskrcnn_model_path, by_name=True)
