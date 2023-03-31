@@ -12,10 +12,10 @@ import os
 from  openpyxl import Workbook
 import sklearn
 from sklearn.metrics import mean_squared_error
-from Configure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
+from BarColor_randomcolor.ICRNConfigure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
 import time, argparse
-from utils.non_local import non_local_block
-from Dataset_generator import GenerateDatasetVGG,GenerateDatasetIRNm
+from BarColor_randomcolor.utils.non_local import non_local_block
+from BarColor_randomcolor.Dataset_generator import GenerateDatasetVGG,GenerateDatasetIRNm
 import pickle
 
 """ some important configuration """

@@ -12,10 +12,10 @@ import os
 from  openpyxl import Workbook
 import sklearn
 from sklearn.metrics import mean_squared_error
-from Configure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
+from Bar3_6.ICRNConfigure import Config, GetProcessBar,ReadLinesInFile, ClearDir, MakeDir, RemoveDir
 import time, argparse
-from utils.non_local import non_local_block
-from Dataset_generator import GenerateDatasetVGG,GenerateDatasetIRNm
+from Bar3_6.utils.non_local import non_local_block
+from Bar3_6.Dataset_generator import GenerateDatasetVGG,GenerateDatasetIRNm
 import pickle
 
 
